@@ -35,7 +35,7 @@ Citizen.CreateThread(function()
 			if isLoggedIn then
 				local ped = PlayerPedId()
 				local pos = GetEntityCoords(ped)
-				local dist = #(pos, vector3(Crypto.Exchange.coords.x, Crypto.Exchange.coords.y, Crypto.Exchange.coords.z))
+				local dist = #(pos - vector3(Crypto.Exchange.coords.x, Crypto.Exchange.coords.y, Crypto.Exchange.coords.z))
 
 				if dist < 15 then
 					inRange = true
