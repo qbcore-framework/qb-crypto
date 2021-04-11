@@ -48,7 +48,7 @@ Citizen.CreateThread(function()
 								TriggerEvent('inventory:client:requiredItems', requiredItems, true)
 							end
 							
-							if IsControlJustPressed(0, Keys["E"]) then
+							if IsControlJustPressed(0, 38) then
 								QBCore.Functions.TriggerCallback('qb-crypto:server:HasSticky', function(HasItem)
 									if HasItem then
 										TriggerEvent("mhacking:show")
