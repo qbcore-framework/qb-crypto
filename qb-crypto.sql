@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS `crypto` (
+  `#` int(11) NOT NULL AUTO_INCREMENT,
+  `crypto` varchar(50) NOT NULL DEFAULT 'qbit',
+  `worth` int(11) NOT NULL DEFAULT 0,
+  `history` text DEFAULT NULL,
+  PRIMARY KEY (`#`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4;
