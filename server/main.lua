@@ -29,7 +29,14 @@ QBCore.Commands.Add("setcryptoworth", "Set crypto value", {{name="crypto", help=
                 TriggerClientEvent('QBCore:Notify', src, "You have the value of "..Crypto.Labels[crypto].."adapted from: ($"..Crypto.Worth[crypto].." to: $"..NewWorth..") ("..ChangeLabel.." "..PercentageChange.."%)")
                 Crypto.Worth[crypto] = NewWorth
                 TriggerClientEvent('qb-crypto:client:UpdateCryptoWorth', -1, crypto, NewWorth)
-                QBCore.Functions.ExecuteSql(false, "UPDATE `crypto` SET `worth` = '"..NewWorth.."', `history` = '"..json.encode(Crypto.History[crypto]).."' WHERE `crypto` = '"..crypto.."'")
+                QBCore.Functions.ExecuteSql(
+                    false, 
+                    {
+                        ['a'] = NewWorth,
+                        ['b'] = json.encode(Crypto.History[crypto]),
+                        ['c'] = crypto
+                    }, 
+                    "UPDATE `crypto` SET `worth` = @a, `history` = @b WHERE `crypto` = @c")
             else
                 TriggerClientEvent('QBCore:Notify', src, "You have not given a new value .. Current values: "..Crypto.Worth[crypto])
             end
@@ -57,7 +64,7 @@ end, "admin")
 RegisterServerEvent('qb-crypto:server:FetchWorth')
 AddEventHandler('qb-crypto:server:FetchWorth', function()
     for name,_ in pairs(Crypto.Worth) do
-        QBCore.Functions.ExecuteSql(false, "SELECT * FROM `crypto` WHERE `crypto` = '"..name.."'", function(result)
+        QBCore.Functions.ExecuteSql(false, {['a'] = name}, "SELECT * FROM `crypto` WHERE `crypto` = @a", function(result)
             if result[1] ~= nil then
                 Crypto.Worth[name] = result[1].worth
                 if result[1].history ~= nil then
@@ -188,7 +195,7 @@ QBCore.Functions.CreateCallback('qb-crypto:server:TransferCrypto', function(sour
     local Player = QBCore.Functions.GetPlayer(source)
 
     if Player.PlayerData.money.crypto >= tonumber(data.Coins) then
-        QBCore.Functions.ExecuteSql(false, "SELECT * FROM `players` WHERE `metadata` LIKE '%"..data.WalletId.."%'", function(result)
+        QBCore.Functions.ExecuteSql(false, {['a']="%"..data.WalletId.."%"}, "SELECT * FROM `players` WHERE `metadata` LIKE @a", function(result)
             if result[1] ~= nil then
                 local CryptoData = {
                     History = Crypto.History["qbit"],
@@ -206,7 +213,7 @@ QBCore.Functions.CreateCallback('qb-crypto:server:TransferCrypto', function(sour
                 else
                     MoneyData = json.decode(result[1].money)
                     MoneyData.crypto = MoneyData.crypto + tonumber(data.Coins)
-                    QBCore.Functions.ExecuteSql(false, "UPDATE `players` SET `money` = '"..json.encode(MoneyData).."' WHERE `citizenid` = '"..result[1].citizenid.."'")
+                    QBCore.Functions.ExecuteSql(false, {['a']=json.encode(MoneyData), ['b']=result[1].citizenid}, "UPDATE `players` SET `money` = @a WHERE `citizenid` = @b")
                 end
                 cb(CryptoData)
             else
