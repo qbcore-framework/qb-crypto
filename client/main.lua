@@ -9,7 +9,7 @@ Citizen.CreateThread(function()
 	end
 end)
 
-function DrawText3Ds(x, y, z, text)
+function DrawText3Ds(coords, text)
 	SetTextScale(0.35, 0.35)
     SetTextFont(4)
     SetTextProportional(1)
@@ -17,7 +17,7 @@ function DrawText3Ds(x, y, z, text)
     SetTextEntry("STRING")
     SetTextCentre(true)
     AddTextComponentString(text)
-    SetDrawOrigin(x,y,z, 0)
+    SetDrawOrigin(coords, 0)
     DrawText(0.0, 0.0)
     local factor = (string.len(text)) / 370
     DrawRect(0.0, 0.0+0.0125, 0.017+ factor, 0.03, 0, 0, 0, 75)
@@ -42,7 +42,7 @@ Citizen.CreateThread(function()
 					
 					if dist < 1.5 then
 						if not Crypto.Exchange.RebootInfo.state then
-							DrawText3Ds(Crypto.Exchange.coords.x, Crypto.Exchange.coords.y, Crypto.Exchange.coords.z, '~g~E~w~ - USB enter')
+							DrawText3Ds(Crypto.Exchange.coords, '~g~E~w~ - USB enter')
 							if not requiredItemsShowed then
 								requiredItemsShowed = true
 								TriggerEvent('inventory:client:requiredItems', requiredItems, true)
@@ -59,7 +59,7 @@ Citizen.CreateThread(function()
 								end)
 							end
 						else
-							DrawText3Ds(Crypto.Exchange.coords.x, Crypto.Exchange.coords.y, Crypto.Exchange.coords.z, 'Systeem is rebooting - '..Crypto.Exchange.RebootInfo.percentage..'%')
+							DrawText3Ds(Crypto.Exchange.coords, 'Systeem is rebooting - '..Crypto.Exchange.RebootInfo.percentage..'%')
 						end
 					else
 						if requiredItemsShowed then
