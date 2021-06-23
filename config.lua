@@ -13,9 +13,9 @@ Crypto.Labels = {
 }
 
 Crypto.Exchange = {
-	coords = {x = 1276.21, y = -1709.88, z = 54.57, h = 305.5, r = 1.0},
-	RebootInfo = {
-		state = false,
-		percentage = 0
-	}
+    coords = vector3(1276.21, -1709.88, 54.57),
+    RebootInfo = {
+        state = false,
+        percentage = 0
+    }
 }
