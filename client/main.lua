@@ -17,7 +17,7 @@ function DrawText3Ds(coords, text)
     SetTextEntry("STRING")
     SetTextCentre(true)
     AddTextComponentString(text)
-    SetDrawOrigin(coords, 0)
+    SetDrawOrigin(coords.x, coords.y, coords.z, 0)
     DrawText(0.0, 0.0)
     local factor = (string.len(text)) / 370
     DrawRect(0.0, 0.0+0.0125, 0.017+ factor, 0.03, 0, 0, 0, 75)
