@@ -77,7 +77,7 @@ AddEventHandler('qb-crypto:server:ExchangeFail', function()
     local Player = QBCore.Functions.GetPlayer(src)
     local ItemData = Player.Functions.GetItemByName("cryptostick")
 
-    if ItemData ~= nil then
+    if ItemData > 0 then
         Player.Functions.RemoveItem("cryptostick", 1)
         TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items["cryptostick"], "remove")
         TriggerClientEvent('QBCore:Notify', src, "Attempt failed, the stick crashed ..", 'error', 5000)
@@ -107,7 +107,7 @@ AddEventHandler('qb-crypto:server:ExchangeSuccess', function(LuckChance)
     local Player = QBCore.Functions.GetPlayer(src)
     local ItemData = Player.Functions.GetItemByName("cryptostick")
 
-    if ItemData ~= nil then
+    if ItemData > 0 then
         local LuckyNumber = math.random(1, 10)
         local DeelNumber = 1000000
         local Amount = (math.random(611111, 1599999) / DeelNumber)
@@ -127,7 +127,7 @@ QBCore.Functions.CreateCallback('qb-crypto:server:HasSticky', function(source, c
     local Player = QBCore.Functions.GetPlayer(source)
     local Item = Player.Functions.GetItemByName("cryptostick")
 
-    if Item ~= nil then
+    if Item > 0 then
         cb(true)
     else
         cb(false)
