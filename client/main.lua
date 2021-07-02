@@ -1,13 +1,5 @@
-QBCore = nil
 isLoggedIn = false
 local requiredItemsShowed = false
-
-Citizen.CreateThread(function()
-	while QBCore == nil do
-		TriggerEvent('QBCore:GetObject', function(obj) QBCore = obj end)
-		Citizen.Wait(0)
-	end
-end)
 
 function DrawText3Ds(coords, text)
 	SetTextScale(0.35, 0.35)
@@ -155,7 +147,6 @@ AddEventHandler('qb-crypto:client:GetRebootState', function(RebootInfo)
 end)
 
 Citizen.CreateThread(function()
-	isLoggedIn = true
 	TriggerServerEvent('qb-crypto:server:FetchWorth')
 	TriggerServerEvent('qb-crypto:server:GetRebootState')
 end)

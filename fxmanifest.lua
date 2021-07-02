@@ -4,14 +4,12 @@ game 'gta5'
 description 'QB-Crypto'
 version '1.0.0'
 
-server_scripts {
-	'config.lua',
-	'server/main.lua'
+shared_scripts { 
+	'@qb-core/import.lua',
+	'config.lua'
 }
 
-client_scripts {
-	'config.lua',
-	'client/main.lua'
-}
+server_script 'server/main.lua'
+client_script 'client/main.lua'
 
 dependency 'mhacking'
