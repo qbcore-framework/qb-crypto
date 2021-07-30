@@ -54,17 +54,16 @@ end, "admin")
 RegisterServerEvent('qb-crypto:server:FetchWorth')
 AddEventHandler('qb-crypto:server:FetchWorth', function()
     for name,_ in pairs(Crypto.Worth) do
-        exports.ghmattimysql:execute('SELECT * FROM crypto WHERE crypto=@crypto', {['@crypto'] = name}, function(result)
-            if result[1] ~= nil then
-                Crypto.Worth[name] = result[1].worth
-                if result[1].history ~= nil then
-                    Crypto.History[name] = json.decode(result[1].history)
-                    TriggerClientEvent('qb-crypto:client:UpdateCryptoWorth', -1, name, result[1].worth, json.decode(result[1].history))
-                else
-                    TriggerClientEvent('qb-crypto:client:UpdateCryptoWorth', -1, name, result[1].worth, nil)
-                end
+        local result = exports.ghmattimysql:executeSync('SELECT * FROM crypto WHERE crypto=@crypto', {['@crypto'] = name})
+        if result[1] ~= nil then
+            Crypto.Worth[name] = result[1].worth
+            if result[1].history ~= nil then
+                Crypto.History[name] = json.decode(result[1].history)
+                TriggerClientEvent('qb-crypto:client:UpdateCryptoWorth', -1, name, result[1].worth, json.decode(result[1].history))
+            else
+                TriggerClientEvent('qb-crypto:client:UpdateCryptoWorth', -1, name, result[1].worth, nil)
             end
-        end)
+        end
     end
 end)
 
@@ -185,31 +184,31 @@ QBCore.Functions.CreateCallback('qb-crypto:server:TransferCrypto', function(sour
     local Player = QBCore.Functions.GetPlayer(source)
 
     if Player.PlayerData.money.crypto >= tonumber(data.Coins) then
-        exports.ghmattimysql:execute("SELECT * FROM `players` WHERE `metadata` LIKE '%"..data.WalletId.."%'", function(result)
-            if result[1] ~= nil then
-                local CryptoData = {
-                    History = Crypto.History["qbit"],
-                    Worth = Crypto.Worth["qbit"],
-                    Portfolio = Player.PlayerData.money.crypto - tonumber(data.Coins),
-                    WalletId = Player.PlayerData.metadata["walletid"],
-                }
-                Player.Functions.RemoveMoney('crypto', tonumber(data.Coins))
-                TriggerClientEvent('qb-phone:client:AddTransaction', source, Player, data, "You have "..tonumber(data.Coins).." Qbit('s) transferred!", "Depreciation")
-                local Target = QBCore.Functions.GetPlayerByCitizenId(result[1].citizenid)
+        local query = '%'..data.WalletId..'%'
+        local result = exports.ghmattimysql:executeSync('SELECT * FROM `players` WHERE `metadata` LIKE @query', {['@query'] = query})
+        if result[1] ~= nil then
+            local CryptoData = {
+                History = Crypto.History["qbit"],
+                Worth = Crypto.Worth["qbit"],
+                Portfolio = Player.PlayerData.money.crypto - tonumber(data.Coins),
+                WalletId = Player.PlayerData.metadata["walletid"],
+            }
+            Player.Functions.RemoveMoney('crypto', tonumber(data.Coins))
+            TriggerClientEvent('qb-phone:client:AddTransaction', source, Player, data, "You have "..tonumber(data.Coins).." Qbit('s) transferred!", "Depreciation")
+            local Target = QBCore.Functions.GetPlayerByCitizenId(result[1].citizenid)
 
-                if Target ~= nil then
-                    Target.Functions.AddMoney('crypto', tonumber(data.Coins))
-                    TriggerClientEvent('qb-phone:client:AddTransaction', Target.PlayerData.source, Player, data, "There are "..tonumber(data.Coins).." Qbit('s) credited!", "Credit")
-                else
-                    MoneyData = json.decode(result[1].money)
-                    MoneyData.crypto = MoneyData.crypto + tonumber(data.Coins)
-                    exports.ghmattimysql:execute('UPDATE players SET money=@money WHERE citizenid=@citizenid', {['@money'] = json.encode(MoneyData), ['@citizenid'] = result[1].citizenid})
-                end
-                cb(CryptoData)
+            if Target ~= nil then
+                Target.Functions.AddMoney('crypto', tonumber(data.Coins))
+                TriggerClientEvent('qb-phone:client:AddTransaction', Target.PlayerData.source, Player, data, "There are "..tonumber(data.Coins).." Qbit('s) credited!", "Credit")
             else
-                cb("notvalid")
+                MoneyData = json.decode(result[1].money)
+                MoneyData.crypto = MoneyData.crypto + tonumber(data.Coins)
+                exports.ghmattimysql:execute('UPDATE players SET money=@money WHERE citizenid=@citizenid', {['@money'] = json.encode(MoneyData), ['@citizenid'] = result[1].citizenid})
             end
-        end)
+            cb(CryptoData)
+        else
+            cb("notvalid")
+        end
     else
         cb("notenough")
     end
