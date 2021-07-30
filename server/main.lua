@@ -263,7 +263,7 @@ end
 
 RefreshCrypto = function()
     -- Buzzee who?
-    local result = exports.ghmattimysql:executeSync('SELECT * FROM cryto WHERE crypto = @crypto', {['@crypto'] = coin})
+    local result = exports.ghmattimysql:executeSync('SELECT * FROM crypto WHERE crypto = @crypto', {['@crypto'] = coin})
     if result ~= nil and result[1] ~= nil then
         Crypto.Worth[coin] = result[1].worth
         if result[1].history ~= nil then
