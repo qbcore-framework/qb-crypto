@@ -213,3 +213,69 @@ QBCore.Functions.CreateCallback('qb-crypto:server:TransferCrypto', function(sour
         cb("notenough")
     end
 end)
+
+
+-- Crypto New Value (Random)
+local coin = Crypto.Coin
+
+Citizen.CreateThread(function() 
+    while true do
+        Citizen.Wait(Crypto.NewValue*60000)   
+        HandlePriceChance()            
+    end
+end)
+
+HandlePriceChance = function()
+    local currentValue = Crypto.Worth[coin]
+    local prevValue = Crypto.Worth[coin]
+    local trend = math.random(0,100) 
+    local event = math.random(0,100)
+    local chance = event - Crypto.ChanceOfCrashOrLuck
+
+    if event > chance then 
+        if trend <= Crypto.ChanceOfDown then 
+            currentValue = currentValue - math.random(Crypto.CasualDown[1], Crypto.CasualDown[2])
+        elseif trend >= Crypto.ChanceOfUp then 
+            currentValue = currentValue + math.random(Crypto.CasualUp[1], Crypto.CasualUp[2])
+        end
+    else
+        if math.random(0, 1) == 1 then 
+            currentValue = currentValue + math.random(Crypto.Luck[1], Crypto.Luck[2])
+        else
+            currentValue = currentValue - math.random(Crypto.Crash[1], Crypto.Crash[2])
+        end
+    end
+
+    if currentValue <= 1 then 
+        currentValue = 1
+    end
+
+    -- Buzzee who?
+    table.insert(Crypto.History[coin], {PreviousWorth = prevValue, NewWorth = currentValue})
+    Crypto.Worth[coin] = currentValue
+
+    exports.ghmattimysql:execute("UPDATE `crypto` SET `worth` = '"..currentValue.."', `history` = '"..json.encode(Crypto.History[coin]).."' WHERE `crypto` = '"..coin.."'")    
+    RefreshCrypto()
+end
+
+RefreshCrypto = function()
+    exports.ghmattimysql:execute("SELECT * FROM `crypto` WHERE `crypto` = '"..coin.."'", function(result)
+        if result ~= nil and result[1] ~= nil then
+            Crypto.Worth[coin] = result[1].worth
+            if result[1].history ~= nil then
+                Crypto.History[coin] = json.decode(result[1].history)
+                TriggerClientEvent('qb-crypto:client:UpdateCryptoWorth', -1, coin, result[1].worth, json.decode(result[1].history))
+            else
+                TriggerClientEvent('qb-crypto:client:UpdateCryptoWorth', -1, coin, result[1].worth, nil)
+            end
+        end
+    end)
+end
+
+
+AddEventHandler('onResourceStart', function(resourceName)
+    if (GetCurrentResourceName() ~= resourceName) then
+      return
+    end
+    RefreshCrypto()
+  end)
