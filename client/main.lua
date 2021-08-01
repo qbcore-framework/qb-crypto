@@ -125,7 +125,7 @@ end
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded')
 AddEventHandler('QBCore:Client:OnPlayerLoaded', function()
 	isLoggedIn = true
-	TriggerServerEvent('qb-crypto:server:FetchWorth')
+	--TriggerServerEvent('qb-crypto:server:FetchWorth')
 	TriggerServerEvent('qb-crypto:server:GetRebootState')
 end)
 
