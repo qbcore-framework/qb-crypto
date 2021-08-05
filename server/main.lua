@@ -102,7 +102,6 @@ AddEventHandler('qb-crypto:server:ExchangeSuccess', function(LuckChance)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     local ItemData = Player.Functions.GetItemByName("cryptostick")
-
     if ItemData ~= nil then
         local LuckyNumber = math.random(1, 10)
         local DeelNumber = 1000000
@@ -110,7 +109,6 @@ AddEventHandler('qb-crypto:server:ExchangeSuccess', function(LuckChance)
         if LuckChance == LuckyNumber then
             Amount = (math.random(1599999, 2599999) / DeelNumber)
         end
-
         Player.Functions.RemoveItem("cryptostick", 1)
         Player.Functions.AddMoney('crypto', Amount)
         TriggerClientEvent('QBCore:Notify', src, "You have exchanged your Cryptostick for: "..Amount.." QBit(\'s)", "success", 3500)
@@ -216,18 +214,16 @@ end)
 
 
 -- Crypto New Value (Random)
-local coin = Crypto.Coin
-
 Citizen.CreateThread(function() 
     while true do
-        Citizen.Wait(Crypto.NewValue*60000)
-        HandlePriceChance()            
+        Citizen.Wait(Crypto.RefreshTimer*60000)
+        HandlePriceChance()
     end
 end)
 
 HandlePriceChance = function()
-    local currentValue = Crypto.Worth[coin]
-    local prevValue = Crypto.Worth[coin]
+    local currentValue = Crypto.Worth[Crypto.Coin]
+    local prevValue = Crypto.Worth[Crypto.Coin]
     local trend = math.random(0,100) 
     local event = math.random(0,100)
     local chance = event - Crypto.ChanceOfCrashOrLuck
@@ -250,34 +246,26 @@ HandlePriceChance = function()
         currentValue = 1
     end
 
-    table.insert(Crypto.History[coin], {PreviousWorth = prevValue, NewWorth = currentValue})
-    Crypto.Worth[coin] = currentValue
+    table.insert(Crypto.History[Crypto.Coin], {PreviousWorth = prevValue, NewWorth = currentValue})
+    Crypto.Worth[Crypto.Coin] = currentValue
 
     exports.ghmattimysql:execute('UPDATE crypto SET worth = @worth, history = @history WHERE crypto = @crypto', {
-        ['@crypto'] = coin,
+        ['@crypto'] = Crypto.Coin,
         ['@worth'] = currentValue,
-        ['@history'] = json.encode(Crypto.History[coin])
+        ['@history'] = json.encode(Crypto.History[Crypto.Coin])
     })
     RefreshCrypto()
 end
 
 RefreshCrypto = function()
-    local result = exports.ghmattimysql:executeSync('SELECT * FROM crypto WHERE crypto = @crypto', {['@crypto'] = coin})
+    local result = exports.ghmattimysql:executeSync('SELECT * FROM crypto WHERE crypto = @crypto', {['@crypto'] = Crypto.Coin})
     if result ~= nil and result[1] ~= nil then
-        Crypto.Worth[coin] = result[1].worth
+        Crypto.Worth[Crypto.Coin] = result[1].worth
         if result[1].history ~= nil then
-            Crypto.History[coin] = json.decode(result[1].history)
-            TriggerClientEvent('qb-crypto:client:UpdateCryptoWorth', -1, coin, result[1].worth, json.decode(result[1].history))
+            Crypto.History[Crypto.Coin] = json.decode(result[1].history)
+            TriggerClientEvent('qb-crypto:client:UpdateCryptoWorth', -1, Crypto.Coin, result[1].worth, json.decode(result[1].history))
         else
-            TriggerClientEvent('qb-crypto:client:UpdateCryptoWorth', -1, coin, result[1].worth, nil)
+            TriggerClientEvent('qb-crypto:client:UpdateCryptoWorth', -1, Crypto.Coin, result[1].worth, nil)
         end
     end
 end
-
-
-AddEventHandler('onResourceStart', function(resourceName)
-    if (GetCurrentResourceName() ~= resourceName) then
-      return
-    end
-    RefreshCrypto()
-  end)
