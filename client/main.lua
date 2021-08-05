@@ -34,7 +34,7 @@ Citizen.CreateThread(function()
 					
 					if dist < 1.5 then
 						if not Crypto.Exchange.RebootInfo.state then
-							DrawText3Ds(Crypto.Exchange.coords, '~g~E~w~ - USB enter')
+							DrawText3Ds(Crypto.Exchange.coords, '~g~E~w~ - Enter USB')
 							if not requiredItemsShowed then
 								requiredItemsShowed = true
 								TriggerEvent('inventory:client:requiredItems', requiredItems, true)
@@ -83,8 +83,6 @@ function ExchangeFail()
 	if RemoveChance == LosingNumber then
 		TriggerServerEvent('qb-crypto:server:ExchangeFail')
 		TriggerServerEvent('qb-crypto:server:SyncReboot')
-		-- Crypto.Exchange.RebootInfo.state = true
-		-- SystemCrashCooldown()
 	end
 end
 
@@ -144,9 +142,4 @@ AddEventHandler('qb-crypto:client:GetRebootState', function(RebootInfo)
 		Crypto.Exchange.RebootInfo.percentage = RebootInfo.percentage
 		SystemCrashCooldown()
 	end
-end)
-
-Citizen.CreateThread(function()
-	TriggerServerEvent('qb-crypto:server:FetchWorth')
-	TriggerServerEvent('qb-crypto:server:GetRebootState')
 end)
