@@ -283,5 +283,4 @@ AddEventHandler('onResourceStart', function(resourceName)
     if (GetCurrentResourceName() ~= resourceName) then
       return
     end
-    RefreshCrypto()
   end)
