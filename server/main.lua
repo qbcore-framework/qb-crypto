@@ -277,10 +277,3 @@ RefreshCrypto = function()
         end
     end
 end
-
-
-AddEventHandler('onResourceStart', function(resourceName)
-    if (GetCurrentResourceName() ~= resourceName) then
-      return
-    end
-  end)
