@@ -224,7 +224,7 @@ local coin = Crypto.Coin
 
 Citizen.CreateThread(function() 
     while true do
-        Citizen.Wait(Crypto.NewValue*60000)
+        Citizen.Wait(Crypto.RefreshTimer*60000)
         HandlePriceChance()            
     end
 end)
@@ -277,10 +277,3 @@ RefreshCrypto = function()
         end
     end
 end
-
-
-AddEventHandler('onResourceStart', function(resourceName)
-    if (GetCurrentResourceName() ~= resourceName) then
-      return
-    end
-  end)
