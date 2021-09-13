@@ -5,7 +5,7 @@ QBCore.Commands.Add("setcryptoworth", "Set crypto value", {{name="crypto", help=
     if crypto ~= nil then
         if Crypto.Worth[crypto] ~= nil then
             local NewWorth = math.ceil(tonumber(args[2]))
-            
+
             if NewWorth ~= nil then
                 local PercentageChange = math.ceil(((NewWorth - Crypto.Worth[crypto]) / Crypto.Worth[crypto]) * 100)
                 local ChangeLabel = "+"
@@ -26,11 +26,11 @@ QBCore.Commands.Add("setcryptoworth", "Set crypto value", {{name="crypto", help=
                 TriggerClientEvent('QBCore:Notify', src, "You have the value of "..Crypto.Labels[crypto].."adapted from: ($"..Crypto.Worth[crypto].." to: $"..NewWorth..") ("..ChangeLabel.." "..PercentageChange.."%)")
                 Crypto.Worth[crypto] = NewWorth
                 TriggerClientEvent('qb-crypto:client:UpdateCryptoWorth', -1, crypto, NewWorth)
-                exports.oxmysql:insert('INSERT INTO crypto (worth, history) VALUES (@worth, @history) ON DUPLICATE KEY UPDATE worth = @worth, history = @history', {
-                    ['@worth'] = NewWorth,
-                    ['@history'] = json.encode(Crypto.History[crypto]),
+                exports.oxmysql:insert('INSERT INTO crypto (worth, history) VALUES (:worth, :history) ON DUPLICATE KEY UPDATE worth = :worth, history = :history', {
+                    ['worth'] = NewWorth,
+                    ['history'] = json.encode(Crypto.History[crypto]),
                 })
-                -- exports.oxmysql:execute('UPDATE crypto SET worth=@worth, history=@history WHERE crypto=@crypto', {['@worth'] = NewWorth, ), ['@crypto'] = crypto})
+                -- exports.oxmysql:execute('UPDATE crypto SET worth = ?, history = ? WHERE crypto = ?', { NewWorth, "", crypto })
             else
                 TriggerClientEvent('QBCore:Notify', src, "You have not given a new value .. Current values: "..Crypto.Worth[crypto])
             end
@@ -58,7 +58,7 @@ end, "admin")
 RegisterServerEvent('qb-crypto:server:FetchWorth')
 AddEventHandler('qb-crypto:server:FetchWorth', function()
     for name,_ in pairs(Crypto.Worth) do
-        local result = exports.oxmysql:fetchSync('SELECT * FROM crypto WHERE crypto=@crypto', {['@crypto'] = name})
+        local result = exports.oxmysql:fetchSync('SELECT * FROM crypto WHERE crypto = ?', { name })
         if result[1] ~= nil then
             Crypto.Worth[name] = result[1].worth
             if result[1].history ~= nil then
@@ -189,7 +189,7 @@ QBCore.Functions.CreateCallback('qb-crypto:server:TransferCrypto', function(sour
 
     if Player.PlayerData.money.crypto >= tonumber(data.Coins) then
         local query = '%'..data.WalletId..'%'
-        local result = exports.oxmysql:fetchSync('SELECT * FROM `players` WHERE `metadata` LIKE @query', {['@query'] = query})
+        local result = exports.oxmysql:fetchSync('SELECT * FROM `players` WHERE `metadata` LIKE ?', { query })
         if result[1] ~= nil then
             local CryptoData = {
                 History = Crypto.History["qbit"],
@@ -207,7 +207,7 @@ QBCore.Functions.CreateCallback('qb-crypto:server:TransferCrypto', function(sour
             else
                 MoneyData = json.decode(result[1].money)
                 MoneyData.crypto = MoneyData.crypto + tonumber(data.Coins)
-                exports.oxmysql:execute('UPDATE players SET money=@money WHERE citizenid=@citizenid', {['@money'] = json.encode(MoneyData), ['@citizenid'] = result[1].citizenid})
+                exports.oxmysql:execute('UPDATE players SET money = ? WHERE citizenid = ?', { json.encode(MoneyData), result[1].citizenid })
             end
             cb(CryptoData)
         else
@@ -257,15 +257,15 @@ HandlePriceChance = function()
     table.insert(Crypto.History[coin], {PreviousWorth = prevValue, NewWorth = currentValue})
     Crypto.Worth[coin] = currentValue
 
-    exports.oxmysql:insert('INSERT INTO crypto (worth, history) VALUES (@worth, @history) ON DUPLICATE KEY UPDATE worth = @worth, history = @history', {
-        ['@worth'] = currentValue,
-        ['@history'] = json.encode(Crypto.History[coin]),
+    exports.oxmysql:insert('INSERT INTO crypto (worth, history) VALUES (:worth, :history) ON DUPLICATE KEY UPDATE worth = :worth, history = :history', {
+        ['worth'] = currentValue,
+        ['history'] = json.encode(Crypto.History[coin]),
     })
     RefreshCrypto()
 end
 
 RefreshCrypto = function()
-    local result = exports.oxmysql:fetchSync('SELECT * FROM crypto WHERE crypto = @crypto', {['@crypto'] = coin})
+    local result = exports.oxmysql:fetchSync('SELECT * FROM crypto WHERE crypto = ?', { coin })
     if result ~= nil and result[1] ~= nil then
         Crypto.Worth[coin] = result[1].worth
         if result[1].history ~= nil then
