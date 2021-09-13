@@ -1,4 +1,4 @@
-isLoggedIn = false
+local isLoggedIn = false
 local requiredItemsShowed = false
 
 function DrawText3Ds(coords, text)
