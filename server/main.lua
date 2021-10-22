@@ -1,3 +1,64 @@
+-- Variables
+local coin = Crypto.Coin
+local QBCore = exports['qb-core']:GetCoreObject()
+
+-- Function
+local function RefreshCrypto()
+    local result = exports.oxmysql:fetchSync('SELECT * FROM crypto WHERE crypto = ?', { coin })
+    if result ~= nil and result[1] ~= nil then
+        Crypto.Worth[coin] = result[1].worth
+        if result[1].history ~= nil then
+            Crypto.History[coin] = json.decode(result[1].history)
+            TriggerClientEvent("QBCore:Notify", -1,"Crypto now stands at "..result[1].worth.."", "success")
+            TriggerClientEvent('qb-crypto:client:UpdateCryptoWorth', -1, coin, result[1].worth, json.decode(result[1].history))
+        else
+            TriggerClientEvent('qb-crypto:client:UpdateCryptoWorth', -1, coin, result[1].worth, nil)
+        end
+    end
+end
+
+local function HandlePriceChance()
+    local currentValue = Crypto.Worth[coin]
+    local prevValue = Crypto.Worth[coin]
+    local trend = math.random(0,100) 
+    local event = math.random(0,100)
+    local chance = event - Crypto.ChanceOfCrashOrLuck
+
+    if event > chance then 
+        if trend <= Crypto.ChanceOfDown then 
+            currentValue = currentValue - math.random(Crypto.CasualDown[1], Crypto.CasualDown[2])
+        elseif trend >= Crypto.ChanceOfUp then 
+            currentValue = currentValue + math.random(Crypto.CasualUp[1], Crypto.CasualUp[2])
+        end
+    else
+        if math.random(0, 1) == 1 then 
+            currentValue = currentValue + math.random(Crypto.Luck[1], Crypto.Luck[2])
+        else
+            currentValue = currentValue - math.random(Crypto.Crash[1], Crypto.Crash[2])
+        end
+    end
+
+    if currentValue <= 1 then
+        currentValue = 1
+    end
+
+    if Crypto.History[coin][4] then
+        Crypto.History[coin][1] = {PreviousWorth = prevValue, NewWorth = currentValue}
+    else
+        Crypto.History[coin][#Crypto.History[coin] + 1] = {PreviousWorth = prevValue, NewWorth = currentValue}
+    end
+
+    Crypto.Worth[coin] = currentValue
+
+    exports.oxmysql:insert('INSERT INTO crypto (worth, history) VALUES (:worth, :history) ON DUPLICATE KEY UPDATE worth = :worth, history = :history', {
+        ['worth'] = currentValue,
+        ['history'] = json.encode(Crypto.History[coin]),
+    })
+    RefreshCrypto()
+end
+
+-- Commands
+
 QBCore.Commands.Add("setcryptoworth", "Set crypto value", {{name="crypto", help="Name of the crypto currency"}, {name="Value", help="New value of the crypto currency"}}, false, function(source, args)
     local src = source
     local crypto = tostring(args[1])
@@ -9,19 +70,21 @@ QBCore.Commands.Add("setcryptoworth", "Set crypto value", {{name="crypto", help=
             if NewWorth ~= nil then
                 local PercentageChange = math.ceil(((NewWorth - Crypto.Worth[crypto]) / Crypto.Worth[crypto]) * 100)
                 local ChangeLabel = "+"
+
                 if PercentageChange < 0 then
                     ChangeLabel = "-"
                     PercentageChange = (PercentageChange * -1)
                 end
+
                 if Crypto.Worth[crypto] == 0 then
                     PercentageChange = 0
                     ChangeLabel = ""
                 end
 
-                table.insert(Crypto.History[crypto], {
+                Crypto.History[crypto][#Crypto.History[crypto]+1] = {
                     PreviousWorth = Crypto.Worth[crypto],
                     NewWorth = NewWorth
-                })
+                }
 
                 TriggerClientEvent('QBCore:Notify', src, "You have the value of "..Crypto.Labels[crypto].."adapted from: ($"..Crypto.Worth[crypto].." to: $"..NewWorth..") ("..ChangeLabel.." "..PercentageChange.."%)")
                 Crypto.Worth[crypto] = NewWorth
@@ -30,7 +93,6 @@ QBCore.Commands.Add("setcryptoworth", "Set crypto value", {{name="crypto", help=
                     ['worth'] = NewWorth,
                     ['history'] = json.encode(Crypto.History[crypto]),
                 })
-                -- exports.oxmysql:execute('UPDATE crypto SET worth = ?, history = ? WHERE crypto = ?', { NewWorth, "", crypto })
             else
                 TriggerClientEvent('QBCore:Notify', src, "You have not given a new value .. Current values: "..Crypto.Worth[crypto])
             end
@@ -42,21 +104,22 @@ QBCore.Commands.Add("setcryptoworth", "Set crypto value", {{name="crypto", help=
     end
 end, "admin")
 
-QBCore.Commands.Add("checkcryptoworth", "", {}, false, function(source, args)
+QBCore.Commands.Add("checkcryptoworth", "", {}, false, function(source)
     local src = source
     TriggerClientEvent('QBCore:Notify', src, "The Qbit has a value of: $"..Crypto.Worth["qbit"])
-end, "admin")
+end)
 
-QBCore.Commands.Add("crypto", "", {}, false, function(source, args)
+QBCore.Commands.Add("crypto", "", {}, false, function(source)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     local MyPocket = math.ceil(Player.PlayerData.money.crypto * Crypto.Worth["qbit"])
 
     TriggerClientEvent('QBCore:Notify', src, "You have: "..Player.PlayerData.money.crypto.." QBit, with a value of: $"..MyPocket..",-")
-end, "admin")
+end)
 
-RegisterServerEvent('qb-crypto:server:FetchWorth')
-AddEventHandler('qb-crypto:server:FetchWorth', function()
+-- Events
+
+RegisterServerEvent('qb-crypto:server:FetchWorth', function()
     for name,_ in pairs(Crypto.Worth) do
         local result = exports.oxmysql:fetchSync('SELECT * FROM crypto WHERE crypto = ?', { name })
         if result[1] ~= nil then
@@ -71,8 +134,7 @@ AddEventHandler('qb-crypto:server:FetchWorth', function()
     end
 end)
 
-RegisterServerEvent('qb-crypto:server:ExchangeFail')
-AddEventHandler('qb-crypto:server:ExchangeFail', function()
+RegisterServerEvent('qb-crypto:server:ExchangeFail', function()
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     local ItemData = Player.Functions.GetItemByName("cryptostick")
@@ -80,29 +142,25 @@ AddEventHandler('qb-crypto:server:ExchangeFail', function()
     if ItemData ~= nil then
         Player.Functions.RemoveItem("cryptostick", 1)
         TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items["cryptostick"], "remove")
-        TriggerClientEvent('QBCore:Notify', src, "Attempt failed, the stick crashed ..", 'error', 5000)
+        TriggerClientEvent('QBCore:Notify', src, "Cryptostick malfunctioned", 'error')
     end
 end)
 
-RegisterServerEvent('qb-crypto:server:Rebooting')
-AddEventHandler('qb-crypto:server:Rebooting', function(state, percentage)
+RegisterServerEvent('qb-crypto:server:Rebooting', function(state, percentage)
     Crypto.Exchange.RebootInfo.state = state
     Crypto.Exchange.RebootInfo.percentage = percentage
 end)
 
-RegisterServerEvent('qb-crypto:server:GetRebootState')
-AddEventHandler('qb-crypto:server:GetRebootState', function()
+RegisterServerEvent('qb-crypto:server:GetRebootState', function()
     local src = source
     TriggerClientEvent('qb-crypto:client:GetRebootState', src, Crypto.Exchange.RebootInfo)
 end)
 
-RegisterServerEvent('qb-crypto:server:SyncReboot')
-AddEventHandler('qb-crypto:server:SyncReboot', function()
+RegisterServerEvent('qb-crypto:server:SyncReboot', function()
     TriggerClientEvent('qb-crypto:client:SyncReboot', -1)
 end)
 
-RegisterServerEvent('qb-crypto:server:ExchangeSuccess')
-AddEventHandler('qb-crypto:server:ExchangeSuccess', function(LuckChance)
+RegisterServerEvent('qb-crypto:server:ExchangeSuccess', function(LuckChance)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     local ItemData = Player.Functions.GetItemByName("cryptostick")
@@ -122,6 +180,8 @@ AddEventHandler('qb-crypto:server:ExchangeSuccess', function(LuckChance)
         TriggerClientEvent('qb-phone:client:AddTransaction', src, Player, {}, "There are "..Amount.." Qbit('s) credited!", "Credit")
     end
 end)
+
+-- Callbacks
 
 QBCore.Functions.CreateCallback('qb-crypto:server:HasSticky', function(source, cb)
     local Player = QBCore.Functions.GetPlayer(source)
@@ -218,62 +278,11 @@ QBCore.Functions.CreateCallback('qb-crypto:server:TransferCrypto', function(sour
     end
 end)
 
+-- Threads
 
--- Crypto New Value (Random)
-local coin = Crypto.Coin
-
-Citizen.CreateThread(function() 
+Citizen.CreateThread(function()
     while true do
         Citizen.Wait(Crypto.RefreshTimer*60000)
-        HandlePriceChance()            
+        HandlePriceChance()
     end
 end)
-
-HandlePriceChance = function()
-    local currentValue = Crypto.Worth[coin]
-    local prevValue = Crypto.Worth[coin]
-    local trend = math.random(0,100) 
-    local event = math.random(0,100)
-    local chance = event - Crypto.ChanceOfCrashOrLuck
-
-    if event > chance then 
-        if trend <= Crypto.ChanceOfDown then 
-            currentValue = currentValue - math.random(Crypto.CasualDown[1], Crypto.CasualDown[2])
-        elseif trend >= Crypto.ChanceOfUp then 
-            currentValue = currentValue + math.random(Crypto.CasualUp[1], Crypto.CasualUp[2])
-        end
-    else
-        if math.random(0, 1) == 1 then 
-            currentValue = currentValue + math.random(Crypto.Luck[1], Crypto.Luck[2])
-        else
-            currentValue = currentValue - math.random(Crypto.Crash[1], Crypto.Crash[2])
-        end
-    end
-
-    if currentValue <= 1 then 
-        currentValue = 1
-    end
-
-    table.insert(Crypto.History[coin], {PreviousWorth = prevValue, NewWorth = currentValue})
-    Crypto.Worth[coin] = currentValue
-
-    exports.oxmysql:insert('INSERT INTO crypto (worth, history) VALUES (:worth, :history) ON DUPLICATE KEY UPDATE worth = :worth, history = :history', {
-        ['worth'] = currentValue,
-        ['history'] = json.encode(Crypto.History[coin]),
-    })
-    RefreshCrypto()
-end
-
-RefreshCrypto = function()
-    local result = exports.oxmysql:fetchSync('SELECT * FROM crypto WHERE crypto = ?', { coin })
-    if result ~= nil and result[1] ~= nil then
-        Crypto.Worth[coin] = result[1].worth
-        if result[1].history ~= nil then
-            Crypto.History[coin] = json.decode(result[1].history)
-            TriggerClientEvent("QBCore:Notify", -1,"Crypto now stands at "..result[1].worth.."", "success")
-            TriggerClientEvent('qb-crypto:client:UpdateCryptoWorth', -1, coin, result[1].worth, json.decode(result[1].history))
-        else
-            TriggerClientEvent('qb-crypto:client:UpdateCryptoWorth', -1, coin, result[1].worth, nil)
-        end
-    end
-end
