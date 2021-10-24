@@ -4,7 +4,7 @@ local QBCore = exports['qb-core']:GetCoreObject()
 
 -- Function
 local function RefreshCrypto()
-    local result = exports.oxmysql:fetchSync('SELECT * FROM crypto WHERE crypto = ?', { coin })
+    local result = exports.oxmysql:executeSync('SELECT * FROM crypto WHERE crypto = ?', { coin })
     if result ~= nil and result[1] ~= nil then
         Crypto.Worth[coin] = result[1].worth
         if result[1].history ~= nil then
@@ -121,7 +121,7 @@ end)
 
 RegisterServerEvent('qb-crypto:server:FetchWorth', function()
     for name,_ in pairs(Crypto.Worth) do
-        local result = exports.oxmysql:fetchSync('SELECT * FROM crypto WHERE crypto = ?', { name })
+        local result = exports.oxmysql:executeSync('SELECT * FROM crypto WHERE crypto = ?', { name })
         if result[1] ~= nil then
             Crypto.Worth[name] = result[1].worth
             if result[1].history ~= nil then
@@ -249,7 +249,7 @@ QBCore.Functions.CreateCallback('qb-crypto:server:TransferCrypto', function(sour
 
     if Player.PlayerData.money.crypto >= tonumber(data.Coins) then
         local query = '%'..data.WalletId..'%'
-        local result = exports.oxmysql:fetchSync('SELECT * FROM `players` WHERE `metadata` LIKE ?', { query })
+        local result = exports.oxmysql:executeSync('SELECT * FROM `players` WHERE `metadata` LIKE ?', { query })
         if result[1] ~= nil then
             local CryptoData = {
                 History = Crypto.History["qbit"],
