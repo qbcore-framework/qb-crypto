@@ -63,7 +63,7 @@ end
 CreateThread(function()
 	while true do
 		sleep = 5000
-		if LocalPlayer.state['isLoggedIn'] then
+		if LocalPlayer.state.isLoggedIn then
 			local ped = PlayerPedId()
 			local pos = GetEntityCoords(ped)
 			local dist = #(pos - Crypto.Exchange.coords)
@@ -76,7 +76,7 @@ CreateThread(function()
 							requiredItemsShowed = true
 							TriggerEvent('inventory:client:requiredItems', requiredItems, true)
 						end
-						
+
 						if IsControlJustPressed(0, 38) then
 							QBCore.Functions.TriggerCallback('qb-crypto:server:HasSticky', function(HasItem)
 								if HasItem then
@@ -110,7 +110,6 @@ RegisterNetEvent('qb-crypto:client:SyncReboot', function()
 end)
 
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
-	isLoggedIn = true
 	TriggerServerEvent('qb-crypto:server:FetchWorth')
 	TriggerServerEvent('qb-crypto:server:GetRebootState')
 end)
