@@ -9,7 +9,6 @@ local function RefreshCrypto()
         Crypto.Worth[coin] = result[1].worth
         if result[1].history ~= nil then
             Crypto.History[coin] = json.decode(result[1].history)
-            TriggerClientEvent("QBCore:Notify", -1,"Crypto now stands at "..result[1].worth.."", "success")
             TriggerClientEvent('qb-crypto:client:UpdateCryptoWorth', -1, coin, result[1].worth, json.decode(result[1].history))
         else
             TriggerClientEvent('qb-crypto:client:UpdateCryptoWorth', -1, coin, result[1].worth, nil)
