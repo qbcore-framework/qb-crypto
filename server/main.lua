@@ -279,9 +279,9 @@ end)
 
 -- Threads
 
-Citizen.CreateThread(function()
+CreateThread(function()
     while true do
-        Citizen.Wait(Crypto.RefreshTimer*60000)
+        Wait(Crypto.RefreshTimer*60000)
         HandlePriceChance()
     end
 end)
