@@ -244,10 +244,17 @@ QBCore.Functions.CreateCallback('qb-crypto:server:SellCrypto', function(source, 
 end)
 
 QBCore.Functions.CreateCallback('qb-crypto:server:TransferCrypto', function(source, cb, data)
+    local newCoin = tostring(data.Coins)
+    local newWalletId = tostring(data.WalletId)
+    for k, v in pairs(bannedCharacters) do
+        newCoin = string.gsub(newCoin, '%' .. v, '')
+        newWalletId = string.gsub(newWalletId, '%' .. v, '')
+    end
+    data.WalletId = newWalletId
+    data.Coins = tonumber(newCoin)
     local Player = QBCore.Functions.GetPlayer(source)
-
     if Player.PlayerData.money.crypto >= tonumber(data.Coins) then
-        local query = '%'..data.WalletId..'%'
+        local query = '%"walletid":"' .. data.WalletId .. '"%'
         local result = exports.oxmysql:executeSync('SELECT * FROM `players` WHERE `metadata` LIKE ?', { query })
         if result[1] ~= nil then
             local CryptoData = {
