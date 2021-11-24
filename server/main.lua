@@ -1,6 +1,7 @@
 -- Variables
 local coin = Crypto.Coin
 local QBCore = exports['qb-core']:GetCoreObject()
+local bannedCharacters = {'%','$',';'}
 
 -- Function
 local function RefreshCrypto()
