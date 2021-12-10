@@ -208,7 +208,7 @@ end)
 
 QBCore.Functions.CreateCallback('qb-crypto:server:BuyCrypto', function(source, cb, data)
     local Player = QBCore.Functions.GetPlayer(source)
-    if Player.PlayerData.money.bank >= tonumber(data.Price) * tonumber(Crypto.Worth["qbit"]) then
+    if Player.PlayerData.money.bank >= tonumber(data.Coins) * tonumber(Crypto.Worth["qbit"]) then
         local CryptoData = {
             History = Crypto.History["qbit"],
             Worth = Crypto.Worth["qbit"],
