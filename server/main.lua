@@ -17,6 +17,21 @@ local function RefreshCrypto()
     end
 end
 
+local function GetTickerPrice()
+    local ticker_promise = promise.new()
+    PerformHttpRequest("https://min-api.cryptocompare.com/data/price?fsym=" .. Ticker.coin .. "&tsyms=" .. Ticker.currency, function(Error, Result, Head)
+        ticker_promise:resolve(Result) --- Could resolve Error aswell for more accurate Error messages?
+    end, 'GET')
+    Citizen.Await(ticker_promise)
+    local data = json.decode(ticker_promise.value)
+    if data and not data['Response'] then
+        return data[Ticker.currency]
+    else
+        return '\27[31m[ERROR]: Error me no worky\27[0m' -- Go back to original idea of creating a custom erorr handle to translate, easier for most people to fix?
+    end
+end
+
+
 local function HandlePriceChance()
     local currentValue = Crypto.Worth[coin]
     local prevValue = Crypto.Worth[coin]
@@ -293,3 +308,23 @@ CreateThread(function()
         HandlePriceChance()
     end
 end)
+
+-- You touch = you break
+if Ticker.Enabled then
+    Citizen.CreateThread(function()
+        Interval = Ticker.tick_time * 60000
+        if Ticker.tick_time < 2 then
+            Interval = 120000
+        end
+        while(true) do
+            local get_coin_price = GetTickerPrice()
+            if type(get_coin_price) == 'number' then
+                Crypto.Worth["qbit"] = get_coin_price
+            else
+                Ticker.Enabled = false
+                break
+            end
+            Citizen.Wait(Interval)
+        end
+    end)
+end

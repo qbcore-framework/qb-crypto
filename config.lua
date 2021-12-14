@@ -35,3 +35,13 @@ Crypto = {
     CasualDown = {1,10}, -- Min / Max (If it goes down)
     CasualUp = {1,10}, -- Min / Max (If it goes up)
 }
+
+
+
+
+Ticker = {
+    Enabled = true, -- Decide whether the real life price ticker should be enabled or not :)  
+    coin = 'ETH', 
+    currency = 'USD', -- For example USD, NOK, SEK, EUR, CAD and more here https://www.countries-ofthe-world.com/world-currencies.html
+    tick_time = 2 --- Minutes (If lower than 2 minutes it will force itself to 2 minutes)
+}
