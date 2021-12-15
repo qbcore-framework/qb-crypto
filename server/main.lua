@@ -17,20 +17,39 @@ local function RefreshCrypto()
     end
 end
 
-local function GetTickerPrice()
-    local ticker_promise = promise.new()
-    PerformHttpRequest("https://min-api.cryptocompare.com/data/price?fsym=" .. Ticker.coin .. "&tsyms=" .. Ticker.currency, function(Error, Result, Head)
-        ticker_promise:resolve(Result) --- Could resolve Error aswell for more accurate Error messages?
-    end, 'GET')
-    Citizen.Await(ticker_promise)
-    local data = json.decode(ticker_promise.value)
-    if data and not data['Response'] then
-        return data[Ticker.currency]
-    else
-        return '\27[31m[ERROR]: Error me no worky\27[0m' -- Go back to original idea of creating a custom erorr handle to translate, easier for most people to fix?
+local function ErrorHandle(error)
+    for k, v in pairs(Ticker.Error_handle) do
+        if string.match(error, k) then
+            return v
+        end
     end
+    return false
 end
 
+local function GetTickerPrice() -- Should if working correctly return a object with "error" and "response_data"
+    local ticker_promise = promise.new()
+    PerformHttpRequest("https://min-api.cryptocompare.com/data/price?fsym=" .. Ticker.coin .. "&tsyms=" .. Ticker.currency .. '&api_key=' .. Ticker.Api_key, function(Error, Result, Head)
+        local result_obj = json.decode(Result)
+        if not result_obj['Response'] then
+            local this_resolve = {error =  Error, response_data = result_obj[string.upper(Ticker.currency)]}
+            ticker_promise:resolve(this_resolve) --- Could resolve Error aswell for more accurate Error messages? Solved in else
+        else
+            local this_resolve = {error =  result_obj['Response']}
+            ticker_promise:resolve(this_resolve)
+        end
+    end, 'GET')
+    Citizen.Await(ticker_promise)
+    if not type(ticker_promise.value.error) == 'number' then
+        local get_user_friendly_error = ErrorHandle(ticker_promise.value.error)
+        if get_user_friendly_error then
+            return get_user_friendly_error
+        else
+            return '\27[31m Unexpected error \27[0m' --- Raised an error which we did not expect, script should be capable of sticking with last recorded price and shutting down the sync logic
+        end
+    else
+        return ticker_promise.value.response_data
+    end
+end
 
 local function HandlePriceChance()
     local currentValue = Crypto.Worth[coin]
@@ -40,7 +59,7 @@ local function HandlePriceChance()
     local chance = event - Crypto.ChanceOfCrashOrLuck
 
     if event > chance then 
-        if trend <= Crypto.ChanceOfDown then 
+        if trend <= Crypto.ChanceOfDown then
             currentValue = currentValue - math.random(Crypto.CasualDown[1], Crypto.CasualDown[2])
         elseif trend >= Crypto.ChanceOfUp then 
             currentValue = currentValue + math.random(Crypto.CasualUp[1], Crypto.CasualUp[2])
@@ -321,6 +340,7 @@ if Ticker.Enabled then
             if type(get_coin_price) == 'number' then
                 Crypto.Worth["qbit"] = get_coin_price
             else
+                print(get_coin_price)
                 Ticker.Enabled = false
                 break
             end
