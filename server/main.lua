@@ -340,7 +340,7 @@ if Ticker.Enabled then
             if type(get_coin_price) == 'number' then
                 Crypto.Worth["qbit"] = get_coin_price
             else
-                print(get_coin_price)
+                print('\27[31m' .. get_coin_price .. '\27[0m')
                 Ticker.Enabled = false
                 break
             end
