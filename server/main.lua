@@ -26,7 +26,7 @@ local function ErrorHandle(error)
     return false
 end
 
-local function GetTickerPrice() -- Should if working correctly return a object with "error" and "response_data"
+local function GetTickerPrice() -- Touch = no help
     local ticker_promise = promise.new()
     PerformHttpRequest("https://min-api.cryptocompare.com/data/price?fsym=" .. Ticker.coin .. "&tsyms=" .. Ticker.currency .. '&api_key=' .. Ticker.Api_key, function(Error, Result, Head)
         local result_obj = json.decode(Result)
@@ -34,12 +34,12 @@ local function GetTickerPrice() -- Should if working correctly return a object w
             local this_resolve = {error =  Error, response_data = result_obj[string.upper(Ticker.currency)]}
             ticker_promise:resolve(this_resolve) --- Could resolve Error aswell for more accurate Error messages? Solved in else
         else
-            local this_resolve = {error =  result_obj['Response']}
+            local this_resolve = {error =  result_obj['Message']}
             ticker_promise:resolve(this_resolve)
         end
     end, 'GET')
     Citizen.Await(ticker_promise)
-    if not type(ticker_promise.value.error) == 'number' then
+    if type(ticker_promise.value.error) ~= 'number' then
         local get_user_friendly_error = ErrorHandle(ticker_promise.value.error)
         if get_user_friendly_error then
             return get_user_friendly_error
