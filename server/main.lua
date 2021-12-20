@@ -75,19 +75,16 @@ local function HandlePriceChance()
     if currentValue <= 1 then
         currentValue = 1
     end
-
-    if Crypto.History[coin][4] then
-        Crypto.History[coin][1] = {PreviousWorth = prevValue, NewWorth = currentValue}
-    else
-        if not Ticker.Enabled then
+    
+    if not Ticker.Enabled then
+        if Crypto.History[coin][4] then
+            Crypto.History[coin][1] = {PreviousWorth = prevValue, NewWorth = currentValue}
+        else
             Crypto.History[coin][#Crypto.History[coin] + 1] = {PreviousWorth = prevValue, NewWorth = currentValue}
         end
-    end
-
-
-    if not Ticker.Enabled then
         Crypto.Worth[coin] = currentValue
     end
+
     exports.oxmysql:insert('INSERT INTO crypto (worth, history) VALUES (:worth, :history) ON DUPLICATE KEY UPDATE worth = :worth, history = :history', {
         ['worth'] = currentValue,
         ['history'] = json.encode(Crypto.History[coin]),
