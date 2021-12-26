@@ -1,11 +1,12 @@
 Crypto = {
-
+        Lower = 500,
+        Upper = 5000,
     History = {
         ["qbit"] = {}
     },
 
     Worth = {
-        ["qbit"] = 0
+        ["qbit"] = 1000
     },
 
     Labels = {
