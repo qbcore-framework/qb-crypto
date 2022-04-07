@@ -72,10 +72,10 @@ local function HandlePriceChance()
         end
     end
 
-    if currentValue <= Config.Lower then
-        currentValue = Config.Lower
-    elseif currentValue >= Config.Upper then
-        currentValue = Config.Upper
+    if currentValue <= Crypto.Lower then
+        currentValue = Crypto.Lower
+    elseif currentValue >= Crypto.Upper then
+        currentValue = Crypto.Upper
     end
 
     if Crypto.History[coin][4] then
