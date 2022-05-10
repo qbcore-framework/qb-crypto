@@ -62,7 +62,7 @@ end
 
 CreateThread(function()
 	while true do
-		sleep = 5000
+		local sleep = 5000
 		if LocalPlayer.state.isLoggedIn then
 			local ped = PlayerPedId()
 			local pos = GetEntityCoords(ped)
