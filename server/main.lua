@@ -244,7 +244,7 @@ end)
 
 QBCore.Functions.CreateCallback('qb-crypto:server:BuyCrypto', function(source, cb, data)
     local Player = QBCore.Functions.GetPlayer(source)
-    local total_price = tonumber(data.Coins) * tonumber(Crypto.Worth["qbit"])
+    local total_price = tonumber(tonumber(data.Coins) * tonumber(Crypto.Worth["qbit"]))
     if Player.PlayerData.money.bank >= total_price then
         local CryptoData = {
             History = Crypto.History["qbit"],
@@ -272,8 +272,9 @@ QBCore.Functions.CreateCallback('qb-crypto:server:SellCrypto', function(source, 
             WalletId = Player.PlayerData.metadata["walletid"],
         }
         Player.Functions.RemoveMoney('crypto', tonumber(data.Coins))
+        local amount = tonumber(tonumber(data.Coins) * tonumber(Crypto.Worth["qbit"]))
         TriggerClientEvent('qb-phone:client:AddTransaction', source, Player, data, "You have "..tonumber(data.Coins).." Qbit('s) sold!", "Depreciation")
-        Player.Functions.AddMoney('bank', tonumber(data.Coins) * tonumber(Crypto.Worth["qbit"]))
+        Player.Functions.AddMoney('bank', amount)
         cb(CryptoData)
     else
         cb(false)
