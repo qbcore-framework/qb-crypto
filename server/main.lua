@@ -79,6 +79,11 @@ local function HandlePriceChance()
     end
 
     if Crypto.History[coin][4] then
+        for k in 4 do
+            if k > 1 then
+                Crypto.History[coin][k] = Crypto.History[coin][k-1]
+            end
+        end
         Crypto.History[coin][1] = {PreviousWorth = prevValue, NewWorth = currentValue}
     else
         Crypto.History[coin][#Crypto.History[coin] + 1] = {PreviousWorth = prevValue, NewWorth = currentValue}
