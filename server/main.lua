@@ -86,11 +86,24 @@ local function HandlePriceChance()
 
     Crypto.Worth[coin] = currentValue
 
-    MySQL.insert('INSERT INTO crypto (worth, history) VALUES (:worth, :history) ON DUPLICATE KEY UPDATE worth = :worth, history = :history', {
+    local history = json.encode(Crypto.History[coin])
+    local props = {
         ['worth'] = currentValue,
-        ['history'] = json.encode(Crypto.History[coin]),
-    })
-    RefreshCrypto()
+        ['history'] = history,
+        ['crypto'] = coin
+    }
+    MySQL.Async.execute(
+        'UPDATE crypto set worth = :worth, history = :history where crypto = :crypto',
+        props,
+        function(affectedRows)
+            if affectedRows < 1 then
+                print("Crypto not found, inserting new record for " .. coin)
+                MySQL.insert('INSERT INTO crypto (crypto, worth, history) VALUES (:crypto, :worth, :history)',
+                props)
+            end
+            RefreshCrypto()
+        end
+    )
 end
 
 -- Commands
