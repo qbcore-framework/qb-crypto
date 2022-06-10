@@ -98,8 +98,7 @@ local function HandlePriceChance()
         function(affectedRows)
             if affectedRows < 1 then
                 print("Crypto not found, inserting new record for " .. coin)
-                MySQL.insert('INSERT INTO crypto (crypto, worth, history) VALUES (:crypto, :worth, :history)',
-                props)
+                MySQL.insert('INSERT INTO crypto (crypto, worth, history) VALUES (:crypto, :worth, :history)', props)
             end
             RefreshCrypto()
         end
