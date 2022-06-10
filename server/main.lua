@@ -92,7 +92,7 @@ local function HandlePriceChance()
         ['history'] = history,
         ['crypto'] = coin
     }
-    MySQL.Async.execute(
+    MySQL.update(
         'UPDATE crypto set worth = :worth, history = :history where crypto = :crypto',
         props,
         function(affectedRows)
