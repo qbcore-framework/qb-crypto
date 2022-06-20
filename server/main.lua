@@ -139,7 +139,7 @@ QBCore.Commands.Add("setcryptoworth", "Set crypto value", {{name="crypto", help=
                     NewWorth = NewWorth
                 }
 
-                TriggerClientEvent('QBCore:Notify', src, "You have the value of "..Crypto.Labels[crypto].."adapted from: ($"..Crypto.Worth[crypto].." to: $"..NewWorth..") ("..ChangeLabel.." "..PercentageChange.."%)")
+                TriggerClientEvent('QBCore:Notify', src, "You have changed the value of "..Crypto.Labels[crypto].." from: $"..Crypto.Worth[crypto].." to: $"..NewWorth.." ("..ChangeLabel.." "..PercentageChange.."%)")
                 Crypto.Worth[crypto] = NewWorth
                 TriggerClientEvent('qb-crypto:client:UpdateCryptoWorth', -1, crypto, NewWorth)
                 MySQL.insert('INSERT INTO crypto (worth, history) VALUES (:worth, :history) ON DUPLICATE KEY UPDATE worth = :worth, history = :history', {
