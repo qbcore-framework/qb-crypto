@@ -83,7 +83,7 @@ CreateThread(function()
 									TriggerEvent("mhacking:show")
 									TriggerEvent("mhacking:start", math.random(4, 6), 45, HackingSuccess)
 								else
-									QBCore.Functions.Notify('You don\'t have a Cryptostick', 'error')
+									QBCore.Functions.Notify('You don\'t have a cryptostick', 'error')
 								end
 							end)
 						end
