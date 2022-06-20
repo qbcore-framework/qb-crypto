@@ -83,12 +83,12 @@ CreateThread(function()
 									TriggerEvent("mhacking:show")
 									TriggerEvent("mhacking:start", math.random(4, 6), 45, HackingSuccess)
 								else
-									QBCore.Functions.Notify('You have no Cryptostick', 'error')
+									QBCore.Functions.Notify('You don\'t have a Cryptostick', 'error')
 								end
 							end)
 						end
 					else
-						DrawText3Ds(Crypto.Exchange.coords, 'Systeem is rebooting - '..Crypto.Exchange.RebootInfo.percentage..'%')
+						DrawText3Ds(Crypto.Exchange.coords, 'System is rebooting - '..Crypto.Exchange.RebootInfo.percentage..'%')
 					end
 				else
 					if requiredItemsShowed then
