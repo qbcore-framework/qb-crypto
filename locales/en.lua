@@ -1,5 +1,5 @@
 local Translations = {
-    error = {     
+    error = {
         you_dont_have_a_cryptostick = 'You don\'t have a cryptostick',
         one_bus_active = 'You can only have one active bus at a time',
         drop_off_passengers = 'Drop off the passengers before you stop working',
