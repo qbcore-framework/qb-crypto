@@ -1,8 +1,6 @@
 local Translations = {
     error = {
         you_dont_have_a_cryptostick = 'Du har ikke en cryptostick',
-        one_bus_active = 'Du kan kun have én aktiv bus ad gangen',
-        drop_off_passengers = 'Sæt passagererne af, før du holder op med at arbejde',
         cryptostick_malfunctioned = 'Cryptostick defekt'
     },
     success = {
