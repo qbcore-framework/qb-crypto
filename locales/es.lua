@@ -1,8 +1,6 @@
 local Translations = {
     error = {
         you_dont_have_a_cryptostick = 'No tienes un cryptostick',
-        one_bus_active = 'Sólo puedes tener un autobús activo a la vez',
-        drop_off_passengers = 'Deja a los pasajeros antes de dejar de trabajar',
         cryptostick_malfunctioned = 'El criptostick ha funcionado mal'
     },
     success = {
@@ -12,7 +10,7 @@ local Translations = {
         there_are_amount_credited = '¡Hay %{amount} Qbit(s) acreditados!',
         you_have_qbit_purchased = 'Has comprado %{dataCoins} Qbit(s)!'
     },
-    depreciation = {
+    debit = {
         you_have_sold = 'Has vendido %{dataCoins} Qbit(s)!'
     },
     text = {

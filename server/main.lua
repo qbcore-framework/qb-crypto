@@ -290,7 +290,7 @@ QBCore.Functions.CreateCallback('qb-crypto:server:SellCrypto', function(source, 
         }
         Player.Functions.RemoveMoney('crypto', tonumber(data.Coins))
         local amount = math.floor(tonumber(data.Coins) * tonumber(Crypto.Worth["qbit"]))
-        TriggerClientEvent('qb-phone:client:AddTransaction', source, Player, data, Lang:t('depreciation.you_have_sold',{dataCoins = tonumber(data.Coins)}), "Depreciation")
+        TriggerClientEvent('qb-phone:client:AddTransaction', source, Player, data, Lang:t('debit.you_have_sold',{dataCoins = tonumber(data.Coins)}), "Debit")
         Player.Functions.AddMoney('bank', amount)
         cb(CryptoData)
     else
@@ -319,7 +319,7 @@ QBCore.Functions.CreateCallback('qb-crypto:server:TransferCrypto', function(sour
                 WalletId = Player.PlayerData.metadata["walletid"],
             }
             Player.Functions.RemoveMoney('crypto', tonumber(data.Coins))
-            TriggerClientEvent('qb-phone:client:AddTransaction', source, Player, data, "You have "..tonumber(data.Coins).." Qbit('s) transferred!", "Depreciation")
+            TriggerClientEvent('qb-phone:client:AddTransaction', source, Player, data, "You have "..tonumber(data.Coins).." Qbit('s) transferred!", "Debit")
             local Target = QBCore.Functions.GetPlayerByCitizenId(result[1].citizenid)
 
             if Target ~= nil then
