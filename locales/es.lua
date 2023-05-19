@@ -1,8 +1,6 @@
 local Translations = {
     error = {
         you_dont_have_a_cryptostick = 'No tienes un cryptostick',
-        one_bus_active = 'Sólo puedes tener un autobús activo a la vez',
-        drop_off_passengers = 'Deja a los pasajeros antes de dejar de trabajar',
         cryptostick_malfunctioned = 'El criptostick ha funcionado mal'
     },
     success = {
