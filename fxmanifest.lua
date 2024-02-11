@@ -1,7 +1,8 @@
 fx_version 'cerulean'
 game 'gta5'
-
-description 'QB-Crypto'
+lua54 'yes'
+author 'Kakarot'
+description 'Provides the logic for handling cryptocurrency aka qbit'
 version '1.2.1'
 
 shared_scripts {
@@ -17,5 +18,3 @@ server_scripts {
 client_script 'client/main.lua'
 
 dependency 'mhacking'
-
-lua54 'yes'
