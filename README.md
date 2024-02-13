@@ -32,7 +32,7 @@ Now you're all set! Restart the script for it to begin getting live cryto prices
 
 # Dependencies
 - [qb-phone](https://github.com/qbcore-framework/qb-phone)
-- [mhacking](https://github.com/qbcore-framework/mhacking)
+- [qb-minigames](https://github.com/qbcore-framework/qb-minigames)
 
 # License
 

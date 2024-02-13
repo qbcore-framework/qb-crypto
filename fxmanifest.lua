@@ -17,4 +17,4 @@ server_scripts {
 }
 client_script 'client/main.lua'
 
-dependency 'mhacking'
+dependency 'qb-minigames'
