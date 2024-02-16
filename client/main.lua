@@ -50,16 +50,6 @@ local function SystemCrashCooldown()
 	end)
 end
 
-local function HackingSuccess(success)
-    if success then
-		TriggerEvent('mhacking:hide')
-        ExchangeSuccess()
-    else
-		TriggerEvent('mhacking:hide')
-		ExchangeFail()
-	end
-end
-
 CreateThread(function()
 	while true do
 		local sleep = 5000
@@ -80,8 +70,12 @@ CreateThread(function()
 						if IsControlJustPressed(0, 38) then
 							QBCore.Functions.TriggerCallback('qb-crypto:server:HasSticky', function(HasItem)
 								if HasItem then
-									TriggerEvent("mhacking:show")
-									TriggerEvent("mhacking:start", math.random(4, 6), 45, HackingSuccess)
+									local success = exports['qb-minigames']:Hacking(5, 30) -- code block size & seconds to solve
+									if success then
+										ExchangeSuccess()
+									else
+										ExchangeFail()
+									end
 								else
 									QBCore.Functions.Notify(Lang:t('error.you_dont_have_a_cryptostick'), 'error')
 								end
