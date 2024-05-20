@@ -1,23 +1,23 @@
 -- Variables
 local QBCore = exports['qb-core']:GetCoreObject()
 local requiredItemsShowed = false
-local requiredItems = {[1] = {name = QBCore.Shared.Items["cryptostick"]["name"], image = QBCore.Shared.Items["cryptostick"]["image"]}}
+local requiredItems = { [1] = { name = QBCore.Shared.Items['cryptostick']['name'], image = QBCore.Shared.Items['cryptostick']['image'] } }
 
 -- Functions
 
 local function DrawText3Ds(coords, text)
 	SetTextScale(0.35, 0.35)
-    SetTextFont(4)
-    SetTextProportional(1)
-    SetTextColour(255, 255, 255, 215)
-    BeginTextCommandDisplayText("STRING")
-    SetTextCentre(true)
-    AddTextComponentSubstringPlayerName(text)
-    SetDrawOrigin(coords.x, coords.y, coords.z, 0)
-    EndTextCommandDisplayText(0.0, 0.0)
-    local factor = (string.len(text)) / 370
-    DrawRect(0.0, 0.0+0.0125, 0.017+ factor, 0.03, 0, 0, 0, 75)
-    ClearDrawOrigin()
+	SetTextFont(4)
+	SetTextProportional(1)
+	SetTextColour(255, 255, 255, 215)
+	BeginTextCommandDisplayText('STRING')
+	SetTextCentre(true)
+	AddTextComponentSubstringPlayerName(text)
+	SetDrawOrigin(coords.x, coords.y, coords.z, 0)
+	EndTextCommandDisplayText(0.0, 0.0)
+	local factor = (string.len(text)) / 370
+	DrawRect(0.0, 0.0 + 0.0125, 0.017 + factor, 0.03, 0, 0, 0, 75)
+	ClearDrawOrigin()
 end
 
 local function ExchangeSuccess()
@@ -64,7 +64,7 @@ CreateThread(function()
 						DrawText3Ds(Crypto.Exchange.coords, Lang:t('text.enter_usb'))
 						if not requiredItemsShowed then
 							requiredItemsShowed = true
-							TriggerEvent('inventory:client:requiredItems', requiredItems, true)
+							TriggerEvent('qb-inventory:client:requiredItems', requiredItems, true)
 						end
 
 						if IsControlJustPressed(0, 38) then
@@ -82,12 +82,12 @@ CreateThread(function()
 							end)
 						end
 					else
-						DrawText3Ds(Crypto.Exchange.coords, Lang:t('text.system_is_rebooting', {rebootInfoPercentage = Crypto.Exchange.RebootInfo.percentage}) )
+						DrawText3Ds(Crypto.Exchange.coords, Lang:t('text.system_is_rebooting', { rebootInfoPercentage = Crypto.Exchange.RebootInfo.percentage }))
 					end
 				else
 					if requiredItemsShowed then
 						requiredItemsShowed = false
-						TriggerEvent('inventory:client:requiredItems', requiredItems, false)
+						TriggerEvent('qb-inventory:client:requiredItems', requiredItems, false)
 					end
 				end
 			end

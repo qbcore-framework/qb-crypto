@@ -191,10 +191,9 @@ RegisterServerEvent('qb-crypto:server:ExchangeFail', function()
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     local ItemData = Player.Functions.GetItemByName('cryptostick')
-
     if ItemData ~= nil then
-        Player.Functions.RemoveItem('cryptostick', 1)
-        TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items['cryptostick'], 'remove')
+        exports['qb-inventory']:RemoveItem(src, 'cryptostick', 1, false, 'qb-crypto:server:ExchangeFail')
+        TriggerClientEvent('qb-inventory:client:ItemBox', src, QBCore.Shared.Items['cryptostick'], 'remove')
         TriggerClientEvent('QBCore:Notify', src, Lang:t('error.cryptostick_malfunctioned'), 'error')
     end
 end)
@@ -217,7 +216,6 @@ RegisterServerEvent('qb-crypto:server:ExchangeSuccess', function(LuckChance)
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
     local ItemData = Player.Functions.GetItemByName('cryptostick')
-
     if ItemData ~= nil then
         local LuckyNumber = math.random(1, 10)
         local DeelNumber = 1000000
@@ -225,11 +223,10 @@ RegisterServerEvent('qb-crypto:server:ExchangeSuccess', function(LuckChance)
         if LuckChance == LuckyNumber then
             Amount = (math.random(1599999, 2599999) / DeelNumber)
         end
-
-        Player.Functions.RemoveItem('cryptostick', 1)
-        Player.Functions.AddMoney('crypto', Amount, 'crypto stick exchange')
+        exports['qb-inventory']:RemoveItem(src, 'cryptostick', 1, false, 'qb-crypto:server:ExchangeSuccess')
+        Player.Functions.AddMoney('crypto', Amount, 'qb-crypto:server:ExchangeSuccess')
         TriggerClientEvent('QBCore:Notify', src, Lang:t('success.you_have_exchanged_your_cryptostick_for', { amount = Amount }), 'success', 3500)
-        TriggerClientEvent('inventory:client:ItemBox', src, QBCore.Shared.Items['cryptostick'], 'remove')
+        TriggerClientEvent('qb-inventory:client:ItemBox', src, QBCore.Shared.Items['cryptostick'], 'remove')
         TriggerClientEvent('qb-phone:client:AddTransaction', src, Player, {}, Lang:t('credit.there_are_amount_credited', { amount = Amount }), 'Credit')
     end
 end)
