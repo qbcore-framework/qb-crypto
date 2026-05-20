@@ -1,7 +1,8 @@
 -- Variables
-local QBCore = exports['qb-core']:GetCoreObject()
+local QBCore = exports['qb-core']:GetCoreObject({ 'Functions' })
+local sharedItems = exports['qb-core']:GetShared('Items')
 local requiredItemsShowed = false
-local requiredItems = { [1] = { name = QBCore.Shared.Items['cryptostick']['name'], image = QBCore.Shared.Items['cryptostick']['image'] } }
+local requiredItems = { { name = sharedItems['cryptostick']['name'], image = sharedItems['cryptostick']['image'] } }
 
 -- Functions
 
